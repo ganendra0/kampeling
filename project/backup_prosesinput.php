@@ -37,22 +37,20 @@ for ($i = 0; $i < count($sampah_ids); $i++) {
     $total_harga = $berat_kg * $harga_nasabah;
     
     // Insert ke tabel user_sampah
-    $sql = "INSERT INTO user_sampah (user_id, nama_barang, harga_nasabah, berat_kg, total, tanggal_setor) VALUES ('$user_id', (SELECT nama_barang FROM sampah WHERE id = $sampah_id), '$harga_nasabah', '$berat_kg', '$total_harga', NOW())";
+    $sql = "INSERT INTO user_sampah (user_id, nama_barang, harga_nasabah, berat_kg, total, tanggal_setor) 
+            VALUES ('$user_id', (SELECT nama_barang FROM sampah WHERE id = $sampah_id), '$harga_nasabah', '$berat_kg', '$total_harga', NOW())";
 
     if ($conn->query($sql) === TRUE) {
         // Update saldo user
         $update_saldo = "UPDATE user_saldo SET total_berat = total_berat + $berat_kg, total_saldo = total_saldo + $total_harga WHERE user_id = $user_id";
-        $conn->query($update_saldo);
-
-        // Insert ke tabel transactions
-        $sql_transaction = "INSERT INTO transactions (user_id, type, amount) VALUES ('$user_id', 'deposit', '$total_harga')";
-        $conn->query($sql_transaction);
-    
-        echo "Data berhasil disimpan. <a href='dashboard_admin.php'>Kembali ke Dashboard</a>";
+        if ($conn->query($update_saldo) === TRUE) {
+            echo "Data berhasil disimpan. <a href='dashboard_admin.php'>Kembali ke Dashboard</a>";
+        } else {
+            echo "Error: " . $update_saldo . "<br>" . $conn->error;
+        }
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
-    
 }
 
 $conn->close();

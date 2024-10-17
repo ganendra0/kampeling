@@ -17,12 +17,18 @@ if ($conn->connect_error) {
     die("Koneksi gagal: " . $conn->connect_error);
 }
 
-$sql = "SELECT u.id, u.username, SUM(us.berat_kg) as total_berat, SUM(us.total) as total_saldo
-        FROM users u
-        JOIN user_sampah us ON u.id = us.user_id
-        GROUP BY u.id, u.username";
+// Ambil semua permintaan penarikan yang pending
+$sql = "SELECT wr.id, u.username, wr.amount, wr.request_date
+        FROM withdraw_requests wr
+        JOIN users u ON wr.user_id = u.id
+        WHERE wr.status = 'pending'";
+
 $result = $conn->query($sql);
 ?>
+
+<!--  -->
+<!--  -->
+<!--  -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -68,14 +74,14 @@ $result = $conn->query($sql);
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item ">
                 <a class="nav-link" href="dashboard_admin.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="manage_withdrawals.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Request Withdraw</span></a>
@@ -323,31 +329,26 @@ $result = $conn->query($sql);
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Username</th>
-                                <th>Total Berat (Kg)</th>
-                                <th>Total Saldo (Rp)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if ($result->num_rows > 0) {
-                                while($row = $result->fetch_assoc()) {
-                                    echo "<tr>
-                                    <td>" . $row["id"]. "</td>
-                                    <td>" . $row["username"]. "</td>
-                                    <td>" . $row["total_berat"]. "</td>
-                                    <td>" . number_format($row["total_saldo"]). "</td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='4'>No data found</td></tr>";
-                            }
-                            $conn->close();
-                            ?>
-                        </tbody>
+                    <tr>
+            <th>Username</th>
+            <th>Amount</th>
+            <th>Request Date</th>
+            <th>Action</th>
+        </tr>
+        <?php while ($row = $result->fetch_assoc()) { ?>
+            <tr>
+                <td><?php echo $row['username']; ?></td>
+                <td><?php echo $row['amount']; ?></td>
+                <td><?php echo $row['request_date']; ?></td>
+                <td>
+                    <form action="approve_withdrawal.php" method="POST">
+                        <input type="hidden" name="request_id" value="<?php echo $row['id']; ?>">
+                        <button type="submit" name="action" value="approve">Approve</button>
+                        <button type="submit" name="action" value="reject">Reject</button>
+                    </form>
+                </td>
+            </tr>
+        <?php } ?>
                     </table>
                 </div>
             </div>
@@ -424,3 +425,4 @@ $result = $conn->query($sql);
 </body>
 
 </html>
+
