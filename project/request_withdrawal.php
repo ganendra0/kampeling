@@ -5,6 +5,18 @@ if ($_SESSION['role'] != 'user') {
     exit();
 }
 
+// Koneksi ke database
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "kampeling";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Koneksi gagal: " . $conn->connect_error);
+}
+
 $user_id = $_SESSION['user_id'];
 ?>
 
@@ -98,24 +110,18 @@ $user_id = $_SESSION['user_id'];
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php
+                                $namasql = "SELECT * FROM users WHERE id = '$user_id' ";
+                                $name = $conn->query($namasql);
+                                $rownama = $name->fetch_assoc();
+                                echo $rownama['username']; ?></span>
+                                <img class="img-profile rounded-circle"
+                                    src="img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
-                                </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="logout.php">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -133,11 +139,11 @@ $user_id = $_SESSION['user_id'];
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Request Withdrawal</h1>
-                    <p class="mb-4">Fill out the form below to request a withdrawal.</p>
+                    <h1 class="h3 mb-2 text-gray-800">Tarik Saldo</h1>
+                    <p class="mb-4">Masukkan nominal saldo yang ingin di tarik.</p>
                     <form action="process_withdrawal.php" method="POST">
                         <div class="form-group">
-                            <label for="amount">Amount to Withdraw:</label>
+                            <label for="amount">Masukkan nominal:</label>
                             <input type="number" step="0.01" id="amount" name="amount" class="form-control" required>
                         </div>
                         <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
@@ -154,7 +160,7 @@ $user_id = $_SESSION['user_id'];
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
+                        <span>Copyright &copy; Kampeling 2024</span>
                     </div>
                 </div>
             </footer>
